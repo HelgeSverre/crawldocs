@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go mod init:*)",
+      "Bash(go mod:*)",
+      "Bash(go build:*)",
+      "Bash(./crawldocs:*)",
+      "Bash(make:*)",
+      "Bash(go test:*)",
+      "Bash(rm:*)",
+      "Bash(curl:*)",
+      "Bash(mv:*)",
+      "Bash(ls:*)",
+      "Bash(chmod:*)",
+      "Bash(asciinema rec:*)",
+      "Bash(agg:*)"
+    ],
+    "deny": []
+  }
+}

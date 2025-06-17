@@ -1,0 +1,50 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+crawldocs
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go vendor directory
+vendor/
+
+# Go workspace file
+go.work
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Output directories (common patterns)
+output/
+crawled/
+*_com/
+*_org/
+*_net/
+*_io/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Debug files
+debug
+
+# Environment files
+.env
+.env.local
