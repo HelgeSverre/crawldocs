@@ -1,124 +1,84 @@
-# CrawlDocs 🤖
+# CrawlDocs
 
-[![Go Version](https://img.shields.io/badge/go-1.19+-blue.svg)](https://golang.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/github/release/HelgeSverre/crawldocs.svg)](https://github.com/HelgeSverre/crawldocs/releases)
+A Go-based web crawler that converts websites into markdown files.
 
-A Go-based website crawler that converts documentation websites into clean-ish markdown files for use as LLM
-documentation, because humans are stupid and no longer needed.
+## Description
 
-![Demo](demo.gif)
-
-## Features
-
-- Concurrent crawling with rate limiting
-- Stays within the target domain
-- Converts HTML to clean markdown
-- Two filename options: sequential numbering (0001.md) or URL-based slugs (installation.md)
-- Configurable page limits and verbose output
+CrawlDocs crawls websites and saves each page as a clean markdown file. It respects domain boundaries, handles duplicate content, and can resume interrupted crawls.
 
 ## Installation
 
-### Go Install
-
 ```bash
+# Clone and build from source
+git clone https://github.com/HelgeSverre/crawldocs.git
+cd crawldocs
+go build -o crawldocs
+
+# Or install directly with Go
 go install github.com/HelgeSverre/crawldocs@latest
 ```
 
-### Build from Source
+## Quick Start
 
 ```bash
-git clone https://github.com/HelgeSverre/crawldocs.git
-cd crawldocs
-make build
-```
-
-## Usage
-
-```bash
-# Basic usage
+# Basic crawl
 crawldocs -url=https://example.com/docs
 
-# With options
-crawldocs -url=https://laravel.com/docs -max=100 -slug -v
+# Crawl with custom output directory
+crawldocs -url=https://example.com/docs -o=output_dir
+
+# Crawl with custom rate limiting (5 pages/sec, 5 workers)
+crawldocs -url=https://example.com -rate=5 -workers=5
+
+# Resume an interrupted crawl
+crawldocs -resume -o=output_dir
+
+# Generate report from previous crawl
+crawldocs -report -o=output_dir
 ```
 
-### Options
+## Parameters
 
-- `-url` - Target URL to crawl (required)
-- `-o` - Output directory (defaults to domain name)
-- `-max` - Maximum pages to crawl (default: 5000, 0 = unlimited)
-- `-slug` - Use URL-based filenames instead of numbers
-- `-v` - Verbose output
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `-url` | string | *required* | Target URL to crawl |
+| `-o` | string | domain name | Output directory for markdown files |
+| `-max` | int | 5000 | Maximum number of pages to crawl |
+| `-rate` | int | 10 | Maximum pages per second (0 = unlimited) |
+| `-workers` | int | 10 | Number of concurrent workers |
+| `-v` | bool | false | Enable verbose output |
+| `-resume` | bool | false | Resume a previous crawl session |
+| `-report` | bool | false | Generate a report from existing crawl data |
 
-## Output
+## Output Structure
 
-Files are saved as markdown with clean content:
-
-```markdown
-# Page Title
-
-Source: https://example.com/page-url
-
----
-
-Page content here...
+```
+output_dir/
+├── 0001.md           # Crawled pages (or slug-based names)
+├── 0002.md
+├── ...
+└── crawl-manifest.json   # Crawl metadata and statistics
 ```
 
-Sequential naming: `0001.md`, `0002.md`, `0003.md`  
-Slug naming (`-slug`): `installation.md`, `getting-started.md`
+Each markdown file contains:
+- Page title as H1
+- Source URL
+- Cleaned text content
 
-## How it Works
+## How It Works
 
-1. Crawls pages using [Colly](https://github.com/gocolly/colly)
-2. Extracts text content from HTML
-3. Removes CSS/JavaScript artifacts
-4. Saves as numbered markdown files
-
-## 🛠️ Development
-
-### Prerequisites
-
-- **Go 1.19+** - [Download](https://golang.org/dl/)
-- **Make** - For build automation
-- **Git** - For version control
-
-### Build Commands
-
-```bash
-# Development build
-make build
-
-# Run tests with coverage
-make test
-
-# Clean build artifacts  
-make clean
-
-# Development server (auto-rebuild)
-make dev
-```
-
-### Testing
-
-```bash
-# Run all tests
-go test ./... -v
-
-# Run tests with coverage
-go test ./... -cover
-
-# Benchmark tests
-go test ./... -bench=.
-```
+1. **Crawling**: Uses concurrent workers to fetch pages within the specified domain
+2. **Content Processing**: Extracts text content, removes CSS/JavaScript artifacts
+3. **Duplicate Detection**: Uses SHA-256 hashing to identify and skip duplicate content
+4. **Progress Tracking**: Saves state to `crawl-manifest.json` for resumability
 
 ## Limitations
 
-- Does not execute JavaScript
-- Does not download images or other assets
-- Code blocks lose syntax highlighting
+- Does not execute JavaScript (server-rendered content only)
+- Text extraction only (no images, CSS, or other assets)
+- Respects robots.txt and rate limits
+- Single domain crawling only
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
+MIT License - see [LICENSE](LICENSE) file for details.
