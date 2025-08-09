@@ -249,7 +249,7 @@ func main() {
 
 	// Handle version flag
 	if *version {
-		fmt.Printf("CrawlDocs v%s - Enhanced Documentation Crawler\n", ManifestVersion)
+		fmt.Printf("CrawlDocs v%s - Website Crawler\n", ManifestVersion)
 		fmt.Println("https://github.com/HelgeSverre/crawldocs")
 		os.Exit(0)
 	}
@@ -294,7 +294,7 @@ func main() {
 
 	// Validate required flags for crawling
 	if *targetURL == "" && !*resume {
-		fmt.Printf("CrawlDocs v%s - Enhanced Documentation Crawler\n", ManifestVersion)
+		fmt.Printf("CrawlDocs v%s - Website Crawler\n", ManifestVersion)
 		fmt.Println()
 		fmt.Println("Usage:")
 		fmt.Println("  crawldocs <URL> [options]")

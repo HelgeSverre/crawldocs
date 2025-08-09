@@ -71,11 +71,11 @@ vet:
 	@echo "Running go vet..."
 	$(GOVET) ./...
 
-# Install the binary to $GOPATH/bin
+# Install the binary globally
 install: build
-	@echo "Installing $(BINARY_NAME)..."
-	@cp $(OUTPUT_DIR)/$(BINARY_NAME) $(GOPATH)/bin/
-	@echo "Installed to $(GOPATH)/bin/$(BINARY_NAME)"
+	@echo "Installing $(BINARY_NAME) globally..."
+	@sudo cp $(OUTPUT_DIR)/$(BINARY_NAME) /usr/local/bin/
+	@echo "Installed to /usr/local/bin/$(BINARY_NAME)"
 
 # Run the application
 run: build
