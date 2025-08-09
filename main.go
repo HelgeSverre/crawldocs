@@ -30,7 +30,7 @@ const (
 	defaultRateLimit   = 10  // requests per second
 	defaultTimeout     = 30  // seconds
 	minContentLength   = 100 // minimum content length to save
-	ManifestVersion    = "1.0.0"
+	ManifestVersion    = "1.1.0"
 )
 
 // Crawler represents the enhanced web crawler with manifest support
@@ -229,21 +229,55 @@ func NewCrawler(targetURL, outputDir string, maxPages, rateLimit, parallelism in
 
 func main() {
 	var (
-		targetURL = flag.String("url", "", "Target URL to crawl (required)")
-		outputDir = flag.String("o", "", "Output directory name (defaults to domain name)")
-		maxPages  = flag.Int("max", defaultMaxPages, "Maximum number of pages to crawl")
-		rateLimit = flag.Int("rate", defaultRateLimit, "Maximum pages per second")
-		workers   = flag.Int("workers", defaultParallelism, "Number of concurrent workers")
-		verbose   = flag.Bool("v", false, "Verbose logging")
-		resume    = flag.Bool("resume", false, "Resume a previous crawl session")
-		report    = flag.Bool("report", false, "Generate a report from manifest")
+		targetURL      = flag.String("url", "", "Target URL to crawl (required)")
+		targetURLShort = flag.String("u", "", "Target URL to crawl (shorthand for --url)")
+		outputDir      = flag.String("output", "", "Output directory name (defaults to domain name)")
+		outputDirShort = flag.String("o", "", "Output directory name (shorthand for --output)")
+		maxPages       = flag.Int("max-pages", defaultMaxPages, "Maximum number of pages to crawl")
+		maxPagesShort  = flag.Int("p", defaultMaxPages, "Maximum number of pages to crawl (shorthand for --max-pages)")
+		rateLimit      = flag.Int("rate-limit", defaultRateLimit, "Maximum pages per second")
+		rateLimitShort = flag.Int("r", defaultRateLimit, "Maximum pages per second (shorthand for --rate-limit)")
+		workers        = flag.Int("workers", defaultParallelism, "Number of concurrent workers")
+		workersShort   = flag.Int("w", defaultParallelism, "Number of concurrent workers (shorthand for --workers)")
+		verbose        = flag.Bool("verbose", false, "Verbose logging")
+		verboseShort   = flag.Bool("v", false, "Verbose logging (shorthand for --verbose)")
+		resume         = flag.Bool("resume", false, "Resume a previous crawl session")
+		report         = flag.Bool("report", false, "Generate a report from manifest")
+		version        = flag.Bool("version", false, "Display version information")
 	)
 	flag.Parse()
+
+	// Handle version flag
+	if *version {
+		fmt.Printf("CrawlDocs v%s - Enhanced Documentation Crawler\n", ManifestVersion)
+		fmt.Println("https://github.com/HelgeSverre/crawldocs")
+		os.Exit(0)
+	}
+
+	// Merge short and long flag values (short takes precedence if both provided)
+	if *targetURLShort != "" {
+		*targetURL = *targetURLShort
+	}
+	if *outputDirShort != "" {
+		*outputDir = *outputDirShort
+	}
+	if *maxPagesShort != defaultMaxPages {
+		*maxPages = *maxPagesShort
+	}
+	if *rateLimitShort != defaultRateLimit {
+		*rateLimit = *rateLimitShort
+	}
+	if *workersShort != defaultParallelism {
+		*workers = *workersShort
+	}
+	if *verboseShort {
+		*verbose = *verboseShort
+	}
 
 	// Handle report generation
 	if *report {
 		if *outputDir == "" {
-			fmt.Println("Error: -o flag is required for report generation")
+			fmt.Println("Error: --output/-o flag is required for report generation")
 			os.Exit(1)
 		}
 		if err := generateReport(*outputDir); err != nil {
@@ -254,35 +288,37 @@ func main() {
 
 	// Validate required flags for crawling
 	if *targetURL == "" && !*resume {
-		fmt.Println("CrawlDocs v2.0 - Enhanced Documentation Crawler")
+		fmt.Printf("CrawlDocs v%s - Enhanced Documentation Crawler\n", ManifestVersion)
 		fmt.Println()
 		fmt.Println("Usage:")
-		fmt.Println("  crawldocs -url=<URL> [-o=<output_dir>] [-max=<max_pages>] [-rate=<pages/sec>] [-workers=<num>] [-v]")
-		fmt.Println("  crawldocs -resume -o=<output_dir> [-v]")
-		fmt.Println("  crawldocs -report -o=<output_dir>")
+		fmt.Println("  crawldocs --url <URL> [--output <dir>] [--max-pages <num>] [--rate-limit <num>] [--workers <num>] [--verbose]")
+		fmt.Println("  crawldocs --resume --output <dir> [--verbose]")
+		fmt.Println("  crawldocs --report --output <dir>")
+		fmt.Println("  crawldocs --version")
 		fmt.Println()
 		fmt.Println("Options:")
-		fmt.Println("  -url      Target URL to crawl")
-		fmt.Println("  -o        Output directory (defaults to domain name)")
-		fmt.Println("  -max      Maximum pages to crawl (default: 5000)")
-		fmt.Println("  -rate     Maximum pages per second (default: 10, 0 = unlimited)")
-		fmt.Println("  -workers  Number of concurrent workers (default: 10)")
-		fmt.Println("  -v        Verbose output")
-		fmt.Println("  -resume   Resume a previous crawl")
-		fmt.Println("  -report   Generate report from manifest")
+		fmt.Println("  --url, -u         Target URL to crawl (required)")
+		fmt.Println("  --output, -o      Output directory (defaults to domain name)")
+		fmt.Println("  --max-pages, -p   Maximum pages to crawl (default: 5000)")
+		fmt.Println("  --rate-limit, -r  Maximum pages per second (default: 10, 0 = unlimited)")
+		fmt.Println("  --workers, -w     Number of concurrent workers (default: 10)")
+		fmt.Println("  --verbose, -v     Verbose output")
+		fmt.Println("  --resume          Resume a previous crawl")
+		fmt.Println("  --report          Generate report from manifest")
+		fmt.Println("  --version         Display version information")
 		fmt.Println()
 		fmt.Println("Examples:")
-		fmt.Println("  crawldocs -url=https://docs.python.org -max=1000")
-		fmt.Println("  crawldocs -url=https://example.com -rate=5 -workers=5")
-		fmt.Println("  crawldocs -resume -o=docs_python_org")
-		fmt.Println("  crawldocs -report -o=docs_python_org")
+		fmt.Println("  crawldocs --url https://docs.python.org --max-pages 1000")
+		fmt.Println("  crawldocs -u https://example.com -r 5 -w 5 -v")
+		fmt.Println("  crawldocs --resume --output docs_python_org")
+		fmt.Println("  crawldocs --report -o docs_python_org")
 		os.Exit(1)
 	}
 
 	// Handle resume
 	if *resume {
 		if *outputDir == "" {
-			fmt.Println("Error: -o flag is required for resume")
+			fmt.Println("Error: --output/-o flag is required for resume")
 			os.Exit(1)
 		}
 
@@ -656,7 +692,7 @@ func (c *Crawler) savePage(e *colly.HTMLElement, currentURL string) error {
 		if len(validation.CleanedContent) >= 500 {
 			duplicateMsg := "duplicate content"
 			fileName := "unknown"
-			
+
 			// originalPage might be nil if it's still in the batch queue
 			if originalPage != nil {
 				duplicateMsg = fmt.Sprintf("duplicate of %s", originalPage.URL)
@@ -665,7 +701,7 @@ func (c *Crawler) savePage(e *colly.HTMLElement, currentURL string) error {
 				// Use the cached URL as fallback
 				duplicateMsg = fmt.Sprintf("duplicate of %s", string(cachedURL))
 			}
-			
+
 			// Add duplicate to manifest
 			c.manifest.AddPage(&PageInfo{
 				URL:            currentURL,
