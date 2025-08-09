@@ -254,6 +254,12 @@ func main() {
 		os.Exit(0)
 	}
 
+	// Handle positional argument as URL (first non-flag argument)
+	args := flag.Args()
+	if len(args) > 0 && *targetURL == "" && *targetURLShort == "" {
+		*targetURL = args[0]
+	}
+
 	// Merge short and long flag values (short takes precedence if both provided)
 	if *targetURLShort != "" {
 		*targetURL = *targetURLShort
@@ -291,13 +297,14 @@ func main() {
 		fmt.Printf("CrawlDocs v%s - Enhanced Documentation Crawler\n", ManifestVersion)
 		fmt.Println()
 		fmt.Println("Usage:")
-		fmt.Println("  crawldocs --url <URL> [--output <dir>] [--max-pages <num>] [--rate-limit <num>] [--workers <num>] [--verbose]")
+		fmt.Println("  crawldocs <URL> [options]")
+		fmt.Println("  crawldocs --url <URL> [options]")
 		fmt.Println("  crawldocs --resume --output <dir> [--verbose]")
 		fmt.Println("  crawldocs --report --output <dir>")
 		fmt.Println("  crawldocs --version")
 		fmt.Println()
 		fmt.Println("Options:")
-		fmt.Println("  --url, -u         Target URL to crawl (required)")
+		fmt.Println("  --url, -u         Target URL to crawl (can also be first argument)")
 		fmt.Println("  --output, -o      Output directory (defaults to domain name)")
 		fmt.Println("  --max-pages, -p   Maximum pages to crawl (default: 5000)")
 		fmt.Println("  --rate-limit, -r  Maximum pages per second (default: 10, 0 = unlimited)")
@@ -308,7 +315,8 @@ func main() {
 		fmt.Println("  --version         Display version information")
 		fmt.Println()
 		fmt.Println("Examples:")
-		fmt.Println("  crawldocs --url https://docs.python.org --max-pages 1000")
+		fmt.Println("  crawldocs https://docs.python.org")
+		fmt.Println("  crawldocs https://example.com --max-pages 1000 --verbose")
 		fmt.Println("  crawldocs -u https://example.com -r 5 -w 5 -v")
 		fmt.Println("  crawldocs --resume --output docs_python_org")
 		fmt.Println("  crawldocs --report -o docs_python_org")
